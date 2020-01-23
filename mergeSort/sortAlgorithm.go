@@ -40,7 +40,7 @@ func Merge(L, R <-chan int) <-chan int {
 func Divide(Blocks ...<-chan int) <-chan int {
 	LenB := len(Blocks)
 	if LenB == 1 {
-		Blocks[0] = SortChannel(Blocks[0]);
+		Blocks[0] = SortChannel(Blocks[0])
 		return Blocks[0]
 	}
 	mid := LenB / 2
@@ -90,8 +90,15 @@ func SortChannel(Vec <-chan int) <-chan int {
 	ret := make(chan int, outSortConst.ChannelSize)
 	go func() {
 		var now []int
-		for v := range Vec {
-			now = append(now, v)
+	READLOOP:
+		for {
+			select {
+			case v, ok := <-Vec:
+				if ok == false {
+					break READLOOP
+				}
+				now = append(now, v)
+			}
 		}
 		now = SortSlice(now)
 		for _, v := range now {

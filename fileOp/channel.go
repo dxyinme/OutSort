@@ -34,15 +34,12 @@ func WriteToFile(fileName string, Ch <-chan int) {
 		panic(err)
 	}
 	writer := bufio.NewWriter(File)
-	for v := range Ch {
-		// fmt.Println(v)
-		WriteInt(writer, v)
-	}
-	READLOOP : for {
+READLOOP:
+	for {
 		select {
-		case v, ok := <-Ch:
+		case v, ok := <-Ch :
 			if ok == false {
-				break READLOOP;
+				break READLOOP
 			} else {
 				WriteInt(writer, v)
 			}

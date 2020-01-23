@@ -28,15 +28,15 @@ func TestWriteToFile(t *testing.T) {
 func TestReadFile(t *testing.T) {
 	fileName := "test.out"
 	Ch := ToChannel(0, 1, 2, 5, 1, 4)
-	a := [] int {0, 1, 2, 5, 1, 4};
+	a := []int{0, 1, 2, 5, 1, 4}
 	WriteToFile(fileName, Ch)
-	ChRead := ReadFile(fileName);
-	cnt := 0;
-	for v := range(ChRead){
-		if(v != a[cnt]){
-			t.Errorf("error in %d\n",cnt);
+	ChRead := ReadFile(fileName)
+	cnt := 0
+	for v := range ChRead {
+		if v != a[cnt] {
+			t.Errorf("error in %d\n", cnt)
 		}
-		cnt ++;
+		cnt++
 	}
 }
 
@@ -44,12 +44,22 @@ func TestReadReader(t *testing.T) {
 	fileName := "test.out"
 	Ch := ToChannel(0, 1, 5, 5, 1, 4)
 	WriteToFile(fileName, Ch)
-	File ,err := os.Open(fileName);
-	if(err != nil){
-		panic(err);
+	File, err := os.Open(fileName)
+	if err != nil {
+		panic(err)
 	}
-	ChRead := ReadReader(File, 8 * 3);
-	for v := range(ChRead){
-		fmt.Println(v);
+	ChRead := ReadReader(File, 8*3)
+	for v := range ChRead {
+		fmt.Println(v)
+	}
+READLOOP:
+	for {
+		select {
+		case v, ok := <-ChRead:
+			if ok == false {
+				break READLOOP
+			}
+			fmt.Println(v)
+		}
 	}
 }
