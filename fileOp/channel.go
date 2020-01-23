@@ -38,16 +38,27 @@ func WriteToFile(fileName string, Ch <-chan int) {
 		// fmt.Println(v)
 		WriteInt(writer, v)
 	}
+	READLOOP : for {
+		select {
+		case v, ok := <-Ch:
+			if ok == false {
+				break READLOOP;
+			} else {
+				WriteInt(writer, v)
+			}
+		}
+	}
 	defer File.Close()
 	defer writer.Flush()
 }
+
 /**
- Limit = outSortConst.SizeInt64 * numberOfYouWant
- */
-func ReadReader(reader io.Reader,Limit int)<-chan int{
-	ret := make(chan int, outSortConst.ChannelSize);
+Limit = outSortConst.SizeInt64 * numberOfYouWant
+*/
+func ReadReader(reader io.Reader, Limit int) <-chan int {
+	ret := make(chan int, outSortConst.ChannelSize)
 	go func() {
-		buf := make([]byte, outSortConst.SizeInt64);
+		buf := make([]byte, outSortConst.SizeInt64)
 		byteRead := 0
 		for {
 			now, err := reader.Read(buf)
@@ -61,7 +72,7 @@ func ReadReader(reader io.Reader,Limit int)<-chan int{
 		}
 		close(ret)
 	}()
-	return ret;
+	return ret
 }
 
 func ReadFile(fileName string) <-chan int {
@@ -69,6 +80,6 @@ func ReadFile(fileName string) <-chan int {
 	if err != nil {
 		panic(err)
 	}
-	buf := bufio.NewReader(File);
-	return ReadReader(buf,-1);
+	buf := bufio.NewReader(File)
+	return ReadReader(buf, -1)
 }
