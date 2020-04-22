@@ -5,14 +5,14 @@ import (
 	"outSort/outSortConst"
 )
 
-func Merge(L, R <-chan int) <-chan int {
-	ret := make(chan int, outSortConst.ChannelSize)
+func Merge(L, R <-chan outSortConst.Data) <-chan outSortConst.Data {
+	ret := make(chan outSortConst.Data, outSortConst.ChannelSize)
 	go func() {
 		vLeft, hasLeft := <-L
 		vRight, hasRight := <-R
 		for hasLeft || hasRight {
 			if hasLeft && hasRight {
-				if vLeft < vRight {
+				if vLeft.ValA < vRight.ValA {
 					ret <- vLeft
 					vLeft, hasLeft = <-L
 				} else {
@@ -35,9 +35,9 @@ func Merge(L, R <-chan int) <-chan int {
 }
 
 /*
-	Blocks[i] 是一个无序的chan int
+	Blocks[i] 是一个无序的chan Data
 */
-func Divide(Blocks ...<-chan int) <-chan int {
+func Divide(Blocks ...<-chan outSortConst.Data) <-chan outSortConst.Data {
 	LenB := len(Blocks)
 	if LenB == 1 {
 		Blocks[0] = SortChannel(Blocks[0])
@@ -47,12 +47,12 @@ func Divide(Blocks ...<-chan int) <-chan int {
 	return Merge(Divide(Blocks[0:mid]...), Divide(Blocks[mid:LenB]...))
 }
 
-func mergeWork(L, R []int) []int {
-	var ret []int
+func mergeWork(L, R []outSortConst.Data) []outSortConst.Data {
+	var ret []outSortConst.Data
 	cl, cr := len(L), len(R)
 	nl, nr := 0, 0
 	for nl < cl && nr < cr {
-		if L[nl] <= R[nr] {
+		if L[nl].ValA <= R[nr].ValA {
 			ret = append(ret, L[nl])
 			nl++
 		} else {
@@ -71,7 +71,7 @@ func mergeWork(L, R []int) []int {
 	return ret
 }
 
-func divWork(a []int) []int {
+func divWork(a []outSortConst.Data) []outSortConst.Data {
 	Len := len(a)
 	if Len == 1 {
 		return a
@@ -80,16 +80,16 @@ func divWork(a []int) []int {
 	return mergeWork(divWork(a[0:mid]), divWork(a[mid:Len]))
 }
 
-func SortSlice(now []int) []int {
+func SortSlice(now []outSortConst.Data) []outSortConst.Data {
 	// sort.Ints(now)
 	fmt.Println("sortSlice")
 	return divWork(now)
 }
 
-func SortChannel(Vec <-chan int) <-chan int {
-	ret := make(chan int, outSortConst.ChannelSize)
+func SortChannel(Vec <-chan outSortConst.Data) <-chan outSortConst.Data {
+	ret := make(chan outSortConst.Data, outSortConst.ChannelSize)
 	go func() {
-		var now []int
+		var now []outSortConst.Data
 	READLOOP:
 		for {
 			select {

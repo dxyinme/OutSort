@@ -1,25 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
 func Test_sortLine(t *testing.T) {
-	Product(100)
+	Product(101)
 	time.Sleep(1000)
 	fileName := "test.in"
-	res := sortLine(fileName, 100, 4)
-	bef := -1
+	res := sortLine(fileName, 101 , 4)
 	cnt := 0
 	for v := range res {
-		if v < bef && cnt > 0 {
-			t.Errorf("Error in %d %d\n", cnt, v)
-		}
-		bef = v
-		cnt++
+		fmt.Println(v)
+		cnt ++
 	}
-	if cnt != 100 {
+	fmt.Println(cnt)
+	if cnt != 101 {
 		t.Errorf("failed in loss data")
 	}
 }
