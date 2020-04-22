@@ -9,6 +9,14 @@ type Item interface {
 	Less(than Item) bool
 }
 
+type Token struct {
+	ValA uint32
+	Pos int64
+}
+
+func (a Token) Less(b Item) bool {
+	return a.ValA < b.(Token).ValA
+}
 
 const (
 	DefaultFreeListSize = 32
@@ -421,7 +429,7 @@ func (t *BTree) deleteItem(item Item, typ toRemove) Item {
 	return out
 }
 
-func (t *BTree) Get(key Item) Item {
+func (t *BTree) Search(key Item) Item {
 	if t.root == nil {
 		return nil
 	}
@@ -448,11 +456,4 @@ func (n *node) reset(c *copyOnWriteContext) bool {
 	return c.freeNode(n) != ftFreelistFull
 }
 
-type Token struct {
-	ValA uint32
-	Pos int64
-}
 
-func (a Token) Less(b Item) bool {
-	return a.ValA < b.(Token).ValA
-}

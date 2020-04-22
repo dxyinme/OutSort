@@ -113,8 +113,35 @@ func ReadPos(filename string , Pos int64) outSortConst.Data {
 	File.Seek(Pos,0)
 	_, err1 := File.Read(buf)
 	if err1 != nil {
-		panic(err)
+		panic(err1)
 	}
 	return DecodeBuf(buf)
 }
 
+func WritePos(filename string , data outSortConst.Data, Pos int64) {
+	buf := EncodeBuf(data)
+	File , err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer File.Close()
+	File.Seek(Pos , 0)
+	writer := bufio.NewWriter(File)
+	_, err1 := writer.Write(buf)
+	if err1!=nil {
+		panic(err1)
+	}
+}
+
+func WriteEnd(filename string , data outSortConst.Data) {
+	buf := EncodeBuf(data)
+	File, err := os.OpenFile(filename , os.O_WRONLY|os.O_APPEND, 0666)
+	if err!=nil{
+		panic(err)
+	}
+	defer File.Close()
+	_ , err1 := File.Write(buf)
+	if err1 != nil {
+		panic(err1)
+	}
+}

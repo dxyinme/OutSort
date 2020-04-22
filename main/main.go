@@ -32,7 +32,8 @@ func main() {
 		}
 		os.Exit(0)
 	}()
-	Cnt := 1000000
+	Step := outSortConst.SizeByte + outSortConst.SizeInt32
+	Cnt := 100
 	tr := Btree.New(*btreeDegree)
 	Product(Cnt)
 	time.Sleep(5000)
@@ -44,12 +45,13 @@ func main() {
 	var pos int64 = 0
 	for v := range chanData {
 		tr.ReplaceOrInsert(Btree.Token{ValA: v.ValA , Pos: pos})
-		pos += int64(outSortConst.SizeByte + outSortConst.SizeInt32)
+		pos += int64(Step)
 	}
 	fmt.Println(" G ValA(查找关键字为ValA的字符串)\n " +
 		"I ValA ValB(插入/替换一个记录)\n " +
 		"D ValA (删除关键字为ValA的记录)\n " +
 		"E (退出程序 , 进行归并排序)")
+	FileSize := int64(Cnt * Step)
 	for {
 		var ValA uint32
 		var ValB string
@@ -57,15 +59,24 @@ func main() {
 		_, _ = fmt.Scanf("%s", &ty)
 		if ty[0] == 'G' {
 			_, _ = fmt.Scanf("%d", &ValA)
-			o := tr.Get(Btree.Token{ValA , 0})
-			data := fileOp.ReadPos(filename,o.(Btree.Token).Pos)
-			fmt.Print(data.ValA)
-			fmt.Print(" ")
-			fmt.Println(string(data.ValB))
+			o := tr.Search(Btree.Token{ValA: ValA , Pos : 0})
+			if o == nil {
+				fmt.Println("Can't find this Item")
+			}else {
+				data := fileOp.ReadPos(filename,o.(Btree.Token).Pos)
+				fmt.Print(data.ValA)
+				fmt.Print(" ")
+				fmt.Println(string(data.ValB))
+			}
 		}else if ty[0] == 'I' {
 			_, _ = fmt.Scanf("%d %s", &ValA, &ValB)
+			now := outSortConst.Data{ValA:ValA , ValB : []byte(ValB)}
+			fileOp.WriteEnd(filename , now)
+			tr.ReplaceOrInsert(Btree.Token{ValA: ValA , Pos: FileSize})
+			FileSize += int64(Step)
 		}else if ty[0] == 'D' {
 			_, _ = fmt.Scanf("%d" , &ValA)
+			tr.Delete(Btree.Token{ValA: ValA , Pos : 0})
 		}else if ty[0] == 'E' {
 			break
 		}else{
