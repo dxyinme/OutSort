@@ -3,6 +3,7 @@ package mergeSort
 import (
 	"fmt"
 	"outSort/outSortConst"
+	"sort"
 )
 
 func Merge(L, R <-chan outSortConst.Data) <-chan outSortConst.Data {
@@ -35,12 +36,12 @@ func Merge(L, R <-chan outSortConst.Data) <-chan outSortConst.Data {
 }
 
 /*
-	Blocks[i] 是一个无序的chan Data
+	Blocks[i] 是一个有序的chan Data
 */
 func Divide(Blocks ...<-chan outSortConst.Data) <-chan outSortConst.Data {
 	LenB := len(Blocks)
 	if LenB == 1 {
-		Blocks[0] = SortChannel(Blocks[0])
+		Blocks[0] = Blocks[0]
 		return Blocks[0]
 	}
 	mid := LenB / 2
@@ -80,17 +81,17 @@ func divWork(a []outSortConst.Data) []outSortConst.Data {
 	return mergeWork(divWork(a[0:mid]), divWork(a[mid:Len]))
 }
 
-func SortSlice(now []outSortConst.Data) []outSortConst.Data {
-	// sort.Ints(now)
+func SortSlice(now outSortConst.DataList) outSortConst.DataList {
 	fmt.Println("sortSlice")
-	return divWork(now)
+	sort.Sort(now)
+	return now
 }
 
 func SortChannel(Vec <-chan outSortConst.Data) <-chan outSortConst.Data {
 	ret := make(chan outSortConst.Data, outSortConst.ChannelSize)
 	go func() {
-		var now []outSortConst.Data
-	READLOOP:
+		var now outSortConst.DataList
+		READLOOP:
 		for {
 			select {
 			case v, ok := <-Vec:

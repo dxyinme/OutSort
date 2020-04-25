@@ -19,7 +19,7 @@ func (a Token) Less(b Item) bool {
 }
 
 const (
-	DefaultFreeListSize = 32
+	DefaultFreeListSize = 4
 )
 
 var (
@@ -384,7 +384,7 @@ func (c *copyOnWriteContext) freeNode(n *node) freeType {
 
 func (t *BTree) ReplaceOrInsert(item Item) Item {
 	if item == nil {
-		panic("nil item being added to BTree")
+		panic("nil item")
 	}
 	if t.root == nil {
 		t.root = t.cow.newNode()
@@ -455,5 +455,3 @@ func (n *node) reset(c *copyOnWriteContext) bool {
 	}
 	return c.freeNode(n) != ftFreelistFull
 }
-
-

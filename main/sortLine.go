@@ -7,36 +7,45 @@ import (
 	"outSort/outSortConst"
 )
 
-
 /*
 cntNum 用的是 数字个数
- */
-func sortLine(fileName string, cntNum, blockNum int) <-chan outSortConst.Data {
-	blockSize := cntNum / blockNum
-	if cntNum % blockNum != 0 {
-		blockSize ++
-	}
-	now := int64(0)
-	var res []<-chan outSortConst.Data
-	for i := 0; i < blockNum; i++ {
-		File, err := os.Open(fileName)
-		if err != nil {
+*/
+func sortPre(filename string , tempFilename string, cntNum, blockSize int) {
+	sum := 0
+	for sum < cntNum {
+		File , err := os.Open(filename)
+		if err!=nil {
 			panic(err)
 		}
-		File.Seek(now, 0)
-		chanNow := fileOp.ReadReader(File, (outSortConst.SizeInt32 + outSortConst.SizeByte) * blockSize)
-		res = append(res, chanNow)
-		now += int64(blockSize * (outSortConst.SizeByte + outSortConst.SizeInt32))
+		File.Seek(int64(sum*outSortConst.SizeStep),0)
+		now := cntNum - sum
+		if now > blockSize {
+			now = blockSize
+		}
+		chanNow := fileOp.ReadReader(File , outSortConst.SizeStep * now)
+		res := mergeSort.SortChannel(chanNow)
+		fileOp.WriteChannel(tempFilename,res)
+		sum += now
 	}
-	//for _,v := range res {
-	//	for {
-	//		now , ok := <-v
-	//		if ok == false {
-	//			break
-	//		}
-	//		fmt.Printf(" %d",now.ValA)
-	//	}
-	//	fmt.Println()
-	//}
+}
+
+
+func sortMerge(tempFilename string , cntNum, blockSize int) <-chan outSortConst.Data {
+	sum := 0
+	var res []<-chan outSortConst.Data
+	for sum < cntNum {
+		File , err := os.Open(tempFilename)
+		if err!=nil {
+			panic(err)
+		}
+		File.Seek(int64(sum*outSortConst.SizeStep),0)
+		now := cntNum - sum
+		if now > blockSize {
+			now = blockSize
+		}
+		chanNow := fileOp.ReadReader(File , outSortConst.SizeStep * now)
+		res = append(res , chanNow)
+		sum += now
+	}
 	return mergeSort.Divide(res...)
 }
