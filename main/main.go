@@ -109,5 +109,5 @@ func main() {
 	sortPre(filename, tempFilename , Cnt , outSortConst.SortSize)
 	res := sortMerge(tempFilename,Cnt,outSortConst.SortSize)
 	fileOp.WriteToFile(outFilename , res)
-	fmt.Printf("Delete use time : %v \n " , time.Since(Start))
+	fmt.Printf("sort time : %v \n " , time.Since(Start))
 }
