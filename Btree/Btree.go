@@ -180,13 +180,17 @@ func (n *node) mutableFor(cow *copyOnWriteContext) *node {
 	copy(out.children, n.children)
 	return out
 }
-
+/*
+获取n节点的第i个子节点的copy
+ */
 func (n *node) mutableChild(i int) *node {
 	c := n.children[i].mutableFor(n.cow)
 	n.children[i] = c
 	return c
 }
-
+/*
+分裂节点
+ */
 func (n *node) split(i int) (Item, *node) {
 	item := n.items[i]
 	next := n.cow.newNode()
@@ -198,7 +202,9 @@ func (n *node) split(i int) (Item, *node) {
 	}
 	return item, next
 }
-
+/*
+是否分裂自己的孩子
+ */
 func (n *node) maybeSplitChild(i, maxItems int) bool {
 	if len(n.children[i].items) < maxItems {
 		return false
@@ -381,7 +387,9 @@ func (c *copyOnWriteContext) freeNode(n *node) freeType {
 		return ftNotOwned
 	}
 }
-
+/*
+替换相同的B树节点或者是插入一个新节点
+ */
 func (t *BTree) ReplaceOrInsert(item Item) Item {
 	if item == nil {
 		panic("nil item")
@@ -411,7 +419,9 @@ func (t *BTree) ReplaceOrInsert(item Item) Item {
 func (t *BTree) Delete(item Item) Item {
 	return t.deleteItem(item, removeItem)
 }
-
+/*
+删除一个元素
+ */
 func (t *BTree) deleteItem(item Item, typ toRemove) Item {
 	if t.root == nil || len(t.root.items) == 0 {
 		return nil
@@ -428,7 +438,9 @@ func (t *BTree) deleteItem(item Item, typ toRemove) Item {
 	}
 	return out
 }
-
+/*
+查找一个B树元素
+ */
 func (t *BTree) Search(key Item) Item {
 	if t.root == nil {
 		return nil

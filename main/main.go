@@ -3,14 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"outSort/Btree"
 	"outSort/fileOp"
 	"outSort/outSortConst"
-	"runtime"
 	"time"
 )
 
@@ -22,18 +18,6 @@ var tempFilename string = "test.temp"
 var outFilename string = "test.out"
 var btreeDegree = flag.Int("degree", 4, "B-Tree degree")
 func main() {
-
-	runtime.SetMutexProfileFraction(1) // 开启对锁调用的跟踪
-	runtime.SetBlockProfileRate(1) // 开启对阻塞操作的跟踪
-
-	go func() {
-		// pprof
-		// 启动一个 http server，注意 pprof 相关的 handler 已经自动注册过了
-		if err := http.ListenAndServe(":9590", nil); err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(0)
-	}()
 	f1,err1 := os.Create(filename)
 	if err1!=nil {
 		panic(err1)
@@ -56,12 +40,14 @@ func main() {
 	if err!=nil {
 		panic(err)
 	}
+	BtreeTime := time.Now()
 	chanData := fileOp.ReadReader(File,-1)
 	var pos int64 = 0
 	for v := range chanData {
 		tr.ReplaceOrInsert(Btree.Token{ValA: v.ValA , Pos: pos})
 		pos += int64(outSortConst.SizeStep)
 	}
+	fmt.Printf("B tree build time : %v \n" , time.Since(BtreeTime))
 	fmt.Println(" G ValA(查找关键字为ValA的字符串)\n " +
 		"I ValA ValB(插入/替换一个记录)\n " +
 		"D ValA (删除关键字为ValA的记录)\n " +
